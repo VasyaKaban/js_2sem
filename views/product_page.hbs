@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<script>
+    function check_session_key()
+    {
+        if(sessionStorage.getItem("login") == null || sessionStorage.getItem("log_in_as_admin") === 'true')
+        {
+            var btn = document.getElementById("send_comment_btn");
+            btn.setAttribute("disabled", "disabled");
+        }
+    }
+
+    let global_auto_id = {{auto_id}};
+
+</script>
+<html>
+    <body onload="check_session_key();">
+
+        <h1>{{name}}</h1>
+        <p>Продавец: {{owner}}</p>
+        <p>Марка: {{mark}}</p>
+        <p>Цена: {{price}}</p>
+        <img src='{{picture_path}}' width="800" height="600">
+        <br>
+        <p>Описание:</p>
+        <p>{{description}}</p>
+
+        <hr>
+        <h3>Напишите, что думаете!</h3>
+        <form>
+            <input type="text" minlength="1" id="msg">
+            <br>
+            <input type="button" id="send_comment_btn" value="Отправить" onclick="send_comment();">
+        </form>
+
+
+        <ul id="comments">
+            {{#each comments}}
+                <li>
+                    {{this.author}}: {{this.msg}}
+                </li>
+            {{/each}}
+        </ul>
+
+    </body>
+</html>
+<script>
+    function send_comment()
+    {
+        const send_data =
+        {
+            user: sessionStorage.getItem("login"),
+            msg: document.getElementById("msg").value
+        };
+
+        document.getElementById("msg").value = "";
+
+        const data = JSON.stringify(send_data);
+
+        let request = new XMLHttpRequest();
+        request.open("POST", "/cars/" + global_auto_id, true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    var comment = document.createElement("li");
+                    comment.innerHTML = sessionStorage.getItem("login") + ": " + send_data.msg;
+                    document.getElementById("comments").appendChild(comment);
+
+                }
+            });
+        request.send(data);
+    }
+</script>

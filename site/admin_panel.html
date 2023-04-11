@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<script>
+    function check_session_key()
+    {
+        if(sessionStorage.getItem("login") != null && sessionStorage.getItem("log_in_as_admin") === 'true')
+        {
+            get_users();
+        }
+        else
+        {
+                sessionStorage.setItem("log_in_as_admin", 'true');
+                window.location.href = '/log_in';
+        }
+    }
+</script>
+<html>
+    <body onload="check_session_key();">
+
+    <button onclick="get_users();">Работа с пользователями</button>
+    <br>
+    <button onclick="get_autos();">Работа с автомобилями</button>
+    <br>
+    <button onclick="get_pending_autos();">Работа с автомобилями в очереди</button>
+
+    <table align="center" border="1" style="width: 70%;" id="common_table">
+    </table>
+
+
+    </body>
+</html>
+<script>
+
+    function remove_btns()
+    {
+        let btn = document.getElementById("delete_pending");
+        if(btn !== null)
+            btn.parentNode.removeChild(btn);
+
+        btn = document.getElementById("activate_pending");
+        if(btn !== null)
+            btn.parentNode.removeChild(btn);
+    }
+
+    function get_autos()
+    {
+        remove_btns();
+        let request = new XMLHttpRequest();
+        request.open("GET", "/admin_panel/autos", true);
+        //request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+
+                /*
+                id
+                owner
+                name
+                mark
+                description
+                picture_path
+                price
+                status
+                */
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    let tbl = document.getElementById("common_table");
+                    tbl.replaceChildren();
+
+                    let created_tr = document.createElement("tr");
+
+                    let created_th = document.createElement("th");
+                    created_th.innerHTML = "Id";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Owner";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Name";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Mark";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Description";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Picture";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Price";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Status";
+                    created_tr.appendChild(created_th);
+
+                    tbl.appendChild(created_tr);
+
+
+                    for(let i = 0; i < recv.length; i++)
+                    {
+                        created_tr = document.createElement("tr");
+                        created_tr.setAttribute("onclick", "window.location.href = '/cars/" + recv[i].id + "';");
+                        created_tr.style.cursor = "pointer";
+
+                        let created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].id;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].owner;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].name;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].mark;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].description;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        let created_img = document.createElement("img");
+                        created_img.src = recv[i].picture_path;
+                        created_img.width = "300";
+                        created_img.height = "300";
+                        created_td.appendChild(created_img);
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].price;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].status;
+                        created_tr.appendChild(created_td);
+
+                        tbl.appendChild(created_tr);
+                    }
+
+                }
+            });
+        request.send();
+    }
+
+    function get_pending_autos()
+    {
+        remove_btns();
+        let request = new XMLHttpRequest();
+        request.open("GET", "/admin_panel/pending_autos", true);
+        //request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+
+                /*
+                id
+                owner
+                name
+                mark
+                description
+                picture_path
+                price
+                */
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    let tbl = document.getElementById("common_table");
+                    tbl.replaceChildren();
+
+                    let created_tr = document.createElement("tr");
+
+                    let created_th = document.createElement("th");
+                    created_th.innerHTML = "Id";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Owner";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Name";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Mark";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Description";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Picture";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Price";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Change state";
+                    created_tr.appendChild(created_th);
+
+                    tbl.appendChild(created_tr);
+
+                    for(let i = 0; i < recv.length; i++)
+                    {
+                        created_tr = document.createElement("tr");
+
+                        let created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].id;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].owner;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].name;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].mark;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].description;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        let created_img = document.createElement("img");
+                        created_img.src = recv[i].picture_path;
+                        created_img.width = "300";
+                        created_img.height = "300";
+                        created_td.appendChild(created_img);
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].price;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        let created_chk = document.createElement("input");
+                        created_chk.type = "checkbox";
+                        created_chk.id = "checkbox" + recv[i].id;
+                        created_chk.setAttribute("id_car", recv[i].id);
+                        let created_lbl = document.createElement("label");
+                        created_lbl.for = "checkbox" + recv[i].id;
+                        created_td.appendChild(created_lbl);
+                        created_td.appendChild(created_chk);
+                        created_tr.appendChild(created_td);
+
+                        tbl.appendChild(created_tr);
+                    }
+
+
+
+                    tbl.parentNode.insertBefore(document.createElement("br"), tbl.nextSibling);
+
+                    btn = document.createElement("button");
+                    btn.innerHTML = "Удалить";
+                    btn.setAttribute("onclick", "send_pendings_update('delete');");
+                    btn.id="delete_pending";
+                    tbl.parentNode.insertBefore(btn, tbl.nextSibling);
+
+                    btn = document.createElement("button");
+                    btn.innerHTML = "Активировать";
+                    btn.setAttribute("onclick", "send_pendings_update('activate');");
+                    btn.id="activate_pending";
+                    tbl.parentNode.insertBefore(btn, tbl.nextSibling);
+
+
+                }
+            });
+        request.send();
+    }
+
+    function change_user_status(btn, login)
+    {
+        let request = new XMLHttpRequest();
+        request.open("POST", "/admin_panel/users/" + login, true);
+        //request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    if(btn.innerHTML == "Ban")
+                    {
+                        btn.innerHTML = "Unban";
+                        btn.parentNode.previousSibling.innerHTML = "Blocked";
+                        alert("Пользователь " + login + " был заблокирован!");
+                    }
+                    else
+                    {
+                        alert("Пользователь " + login + " был разблокирован!");
+                        btn.parentNode.previousSibling.innerHTML = "Active";
+                        btn.innerHTML = "Ban";
+                    }
+                }
+                else
+                {
+                    alert("Ошибка!");
+                }
+            });
+        request.send(JSON.stringify(login));
+    }
+
+    function get_users()
+    {
+        remove_btns();
+        let request = new XMLHttpRequest();
+        request.open("GET", "/admin_panel/users", true);
+        //request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+
+                /*
+                login
+                status
+                */
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    let tbl = document.getElementById("common_table");
+                    tbl.replaceChildren();
+
+                    let created_tr = document.createElement("tr");
+
+                    let created_th = document.createElement("th");
+                    created_th.innerHTML = "Login";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Status";
+                    created_tr.appendChild(created_th);
+
+                    created_th = document.createElement("th");
+                    created_th.innerHTML = "Change status";
+                    created_tr.appendChild(created_th);
+
+                    tbl.appendChild(created_tr);
+
+
+                    for(let i = 0; i < recv.length; i++)
+                    {
+                        let created_tr = document.createElement("tr");
+
+                        let created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].login;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].status;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        let inp = document.createElement("button");
+                        if(recv[i].status == "Active")
+                            inp.innerHTML = "Ban";
+                        else
+                            inp.innerHTML = "Unban";
+
+                        inp.setAttribute("onclick", "change_user_status(this, '" + recv[i].login + "');");
+                        created_td.appendChild(inp);
+                        created_tr.appendChild(created_td);
+
+
+                        tbl.appendChild(created_tr);
+                    }
+
+                }
+            });
+        request.send();
+    }
+
+    function get_checked_pending()
+    {
+        let checked_cars = [];
+        let tds = document.getElementById("common_table").getElementsByTagName('input');
+        for(let i = 0; i < tds.length; i++)
+        {
+            if(tds[i].checked)
+                checked_cars.push(tds[i].getAttribute("id_car"));
+        }
+
+        return checked_cars;
+    }
+
+    function drop_pendings()
+    {
+        let tds = document.getElementById("common_table").getElementsByTagName('input');
+        for(let i = 0; i < tds.length; i++)
+        {
+            if(tds[i].checked)
+            {
+                let parent_tr = tds[i].parentNode.parentNode;
+                parent_tr.parentNode.removeChild(parent_tr);
+            }
+        }
+    }
+
+    function send_pendings_update(op_type)
+    {
+        const data =
+        {
+            ids: get_checked_pending(),
+            type: op_type
+        };
+
+        if(data.ids.length == 0)
+            return;
+
+
+        let request = new XMLHttpRequest();
+        request.open("POST", "/admin_panel/pending_autos", true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                let recv = JSON.parse(request.response);
+                console.log(recv);
+                if(recv == true)
+                {
+                    drop_pendings();
+
+                }
+                else
+                {
+                    alert("Ошибка при отправке! Попробуйте ещё раз!");
+                }
+            });
+        request.send(JSON.stringify(data));
+    }
+
+</script>

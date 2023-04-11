@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<script>
+    function check_session_key()
+    {
+        if(sessionStorage.getItem("login") == null)
+        {
+            window.location.href = '/log_in';
+        }
+        else
+        {
+            document.getElementById("account_name").innerHTML += sessionStorage.getItem("login");
+
+            get_autos();
+        }
+    }
+
+</script>
+<html>
+    <body onload="check_session_key();">
+
+        <h1 id="account_name">Аккаунт: </h1>
+
+
+        <table align="center" border="1" style="width: 70%;" id="active_cars">
+        <caption>Your cars</caption>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Mark</th>
+                    <th>Description</th>
+                    <th>Picture</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+        </table>
+
+        <table align="center" border="1" style="width: 70%;" id="pending_cars">
+        <caption>Your pending cars</caption>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Mark</th>
+                    <th>Description</th>
+                    <th>Picture</th>
+                    <th>Price</th>
+                </tr>
+        </table>
+
+
+    </body>
+</html>
+<script>
+    function get_autos()
+    {
+        let request = new XMLHttpRequest();
+        request.open("POST", "/profile/" + sessionStorage.getItem("login"), true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                /*
+                active:
+                    id
+                    name
+                    mark
+                    description
+                    picture_path
+                    price
+                    status
+                pending:
+                    id
+                    name
+                    mark
+                    description
+                    picture_path
+                    price
+                */
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    let tbl = document.getElementById("active_cars");
+                    while (tbl.rows.length != 1)
+                    {
+                            tbl.deleteRow(1);
+                    }
+
+                    for(let i = 0; i < recv.active.length; i++)
+                    {
+                        let created_tr = document.createElement("tr");
+                        created_tr.setAttribute("onclick", "window.location.href = '/cars/" + recv.active[i].id + "';");
+                        created_tr.style.cursor = "pointer";
+
+                        let created_td = document.createElement("td");
+                        created_td.innerHTML = recv.active[i].id;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.active[i].name;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.active[i].mark;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.active[i].description;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.setAttribute("align", "center");
+                        let created_img = document.createElement("img");
+                        created_img.src = recv.active[i].picture_path;
+                        created_img.width = "300";
+                        created_img.height = "300";
+                        created_td.appendChild(created_img);
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.active[i].price;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.active[i].status;
+                        created_tr.appendChild(created_td);
+
+                        tbl.appendChild(created_tr);
+                    }
+
+                    tbl = document.getElementById("pending_cars");
+                    while (tbl.rows.length != 1)
+                    {
+                            tbl.deleteRow(1);
+                    }
+
+                    for(let i = 0; i < recv.pending.length; i++)
+                    {
+                        let created_tr = document.createElement("tr");
+
+                        let created_td = document.createElement("td");
+                        created_td.innerHTML = recv.pending[i].id;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.pending[i].name;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.pending[i].mark;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.pending[i].description;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.setAttribute("align", "center");
+                        let created_img = document.createElement("img");
+                        created_img.src = recv.pending[i].picture_path;
+                        created_img.width = "300";
+                        created_img.height = "300";
+                        created_td.appendChild(created_img);
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv.pending[i].price;
+                        created_tr.appendChild(created_td);
+
+                        tbl.appendChild(created_tr);
+                    }
+
+                }
+            });
+
+        request.send();
+    }
+</script>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<script>
+
+    function function_get_marks()
+    {
+        let request = new XMLHttpRequest();
+        request.open("GET", "/cars_marks", true);
+        request.addEventListener
+        ("load", function ()
+            {
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    let target_ul = document.getElementById("marks");
+                    console.log(recv);
+                    for(let i = 0; i < recv.length; i++)
+                    {
+                        let m = document.createElement("li");
+                        let ch = document.createElement("input");
+                        ch.setAttribute("type", "checkbox");
+                        ch.setAttribute("value", recv[i]);
+                        ch.setAttribute("name", recv[i]);
+                        let lbl = document.createElement("label");
+                        lbl.setAttribute("for", recv[i]);
+                        lbl.innerHTML = recv[i];
+                        m.appendChild(ch);
+                        m.appendChild(lbl);
+                        target_ul.appendChild(m);
+
+                    }
+                }
+            });
+
+        request.send();
+    }
+
+    function check_session_key()
+    {
+        if(sessionStorage.getItem("log_in_as_admin") === 'true')
+        {
+            window.location.href = '/admin_panel';
+        }
+        if(sessionStorage.getItem("login") == null)
+        {
+            let acc = document.getElementById("account_name");
+            let log_in = document.createElement("button");
+            log_in.innerHTML = "Войти";
+            log_in.setAttribute("onclick", "sessionStorage.setItem('log_in_as_admin', false); window.location.href = '/log_in';");
+
+            let reg = document.createElement("button");
+            reg.innerHTML = "Регистрация";
+            reg.setAttribute("onclick", "sessionStorage.setItem('log_in_as_admin', false); window.location.href = '/register';");
+
+            acc.parentNode.replaceChild(log_in, acc);
+            log_in.parentNode.insertBefore(reg, log_in);
+
+            let log_in_adm = document.createElement("button");
+            log_in_adm.innerHTML = "Войти как админ";
+            log_in_adm.setAttribute("onclick", "sessionStorage.setItem('log_in_as_admin', true); window.location.href = '/log_in';");
+
+            let reg_adm = document.createElement("button");
+            reg_adm.innerHTML = "Регистрация как админ";
+            reg_adm.setAttribute("onclick", "sessionStorage.setItem('log_in_as_admin', true); window.location.href = '/register';");
+
+            reg.parentNode.insertBefore(log_in_adm, reg);
+            reg.parentNode.insertBefore(reg_adm, reg);
+        }
+        else
+        {
+            let acc_name = document.getElementById("account_name");
+            acc_name.innerHTML = sessionStorage.getItem("login");
+            document.getElementById("profile").href = "profile/" + sessionStorage.getItem("login");
+        }
+
+
+        function_get_marks();
+        get_autos();
+    }
+
+
+
+</script>
+<html>
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <body onload="check_session_key();">
+        <h1>Hello world!</h1>
+        <br>
+        <a href="about">about</a>
+        </br>
+        <a href="create_ad">Create</a>
+        </br>
+        <a id="profile">Profile</a>
+        </br>
+        <p id="account_name">ACCOUNT_NAME_PLACEHOLDER</p>
+
+        <br>
+        Название: <input id="name" value="">
+        <br>
+
+        Марки:
+        <ul id="marks">
+
+        </ul>
+        <br>
+
+        Цена:
+        <input id="lower_price" value="0">
+        <input id="upper_price" value="1000000">
+        <br>
+
+        Сортировка по цене: <input type="checkbox" name="sort_type" onclick="set_sort_type(this)" userdata="price">
+        <br>
+        Порядок сортировки:
+        <br>
+        По-убыванию: <input type="radio" name="sort_group" id="radio_desc" checked>
+        По-возрастанию: <input type="radio" name="sort_group" id="radio_asc">
+        <br>
+
+        <button onclick="find_autos();">Поиск</button>
+
+        <table align="center" border="1" style="width: 70%;" id="common_table">
+                <tr>
+                    <th>Id</th>
+                    <th>Owner</th>
+                    <th>Name</th>
+                    <th>Mark</th>
+                    <th>Description</th>
+                    <th>Picture</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+        </table>
+
+    </body>
+</html>
+<script>
+
+    let params =
+    {
+        name: "",
+        marks: [],
+        lower_price: 0,
+        upper_price: 1000000,
+        sort: "",
+        sort_order: ""
+    };
+
+    function set_sort_type(obj)
+    {
+        let sorts = document.getElementsByName("sort_type");
+        for(let i = 0; i < sorts.length; i++)
+        {
+            if(obj != sorts[i])
+                sorts[i].checked = false;
+        }
+    }
+
+    function find_autos()
+    {
+        params.name = document.getElementById("name").value;
+        params.lower_price = document.getElementById("lower_price").value;
+        params.upper_price = document.getElementById("upper_price").value;
+
+        params.marks = [];
+        let lis = document.getElementById("marks").getElementsByTagName("li");
+        for(let i = 0; i < lis.length; i++)
+        {
+            let inp = lis[i].getElementsByTagName("input")[0];
+            if(inp.checked)
+                params.marks.push(inp.value);
+        }
+
+        let sorts = document.getElementsByName("sort_type");
+        params.sort = "";
+        for(let i = 0; i < sorts.length; i++)
+        {
+            if(sorts[i].checked)
+            {
+                params.sort = sorts[i].getAttribute("userdata");
+                break;
+            }
+        }
+
+        if(params.sort != "")
+        {
+            if(document.getElementById("radio_desc").checked)
+                params.sort_order = "DESC";
+            else
+                params.sort_order = "ASC";
+        }
+
+        console.log(params);
+
+        get_autos();
+    }
+
+    function get_autos()
+    {
+        const data = JSON.stringify(params);
+        console.log(data);
+
+        let request = new XMLHttpRequest();
+        request.open("POST", "/cars_table", true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                /*
+                id
+                owner
+                name
+                mark
+                description
+                picture_path
+                price
+                status
+                */
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    let tbl = document.getElementById("common_table");
+                    while (tbl.rows.length != 1)
+                    {
+                            tbl.deleteRow(1);
+                    }
+
+                    for(let i = 0; i < recv.length; i++)
+                    {
+                        let created_tr = document.createElement("tr");
+                        created_tr.setAttribute("onclick", "window.location.href = '/cars/" + recv[i].id + "';");
+                        created_tr.style.cursor = "pointer";
+
+                        let created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].id;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].owner;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].name;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].mark;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].description;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.setAttribute("align", "center");
+                        let created_img = document.createElement("img");
+                        created_img.src = recv[i].picture_path;
+                        created_img.width = "300";
+                        created_img.height = "300";
+                        created_td.appendChild(created_img);
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].price;
+                        created_tr.appendChild(created_td);
+
+                        created_td = document.createElement("td");
+                        created_td.innerHTML = recv[i].status;
+                        created_tr.appendChild(created_td);
+
+                        tbl.appendChild(created_tr);
+                    }
+
+                }
+            });
+
+        request.send(data);
+    }
+</script>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<script>
+    function check_session_key()
+    {
+        if(sessionStorage.getItem("login") == null)
+        {
+            window.location.href = '/log_in';
+        }
+    }
+
+</script>
+<html>
+    <body onload="check_session_key();">
+
+    <form onsubmit="create_pending_ad(); return false;" id="data_form">
+        <input type="text" id="auto_name" minlength="1" maxlength="255" required>
+        <label for="auto_name">Введите название:</label>
+        <br>
+
+
+        <select id="auto_mark">
+            {{#each autos}}
+                <option>{{this}}</option>
+            {{/each}}
+        </select>
+        <label for="auto_mark">Выберите марку автомобиля:</label>
+        <br>
+
+        <textarea id="auto_description" minlength="1" maxlength="65560" required></textarea>
+        <label for="auto_description">Выберите описание:</label>
+        <br>
+
+        <input type="number" id="auto_price" minlength="1" step="0.01" required>
+        <label for="auto_price">Введите цену:</label>
+        <br>
+
+        <input type="file" accept="image/*" id="auto_picture" required>
+        <label for="auto_picture">Выберите изображение:</label>
+        <br>
+
+        <button type="submit">Создать</button>
+
+    </form>
+
+    </body>
+</html>
+<script>
+    function create_pending_ad()
+    {
+        let mark_select = document.getElementById("auto_mark");
+        let ext = document.getElementById("auto_picture").value;
+
+        const reader = new FileReader();
+
+        let file = document.getElementById("auto_picture").files[0];
+
+        reader.onload = function()
+        {
+            const send_data =
+            {
+                owner: sessionStorage.getItem("login"),
+                auto_name: document.getElementById("auto_name").value,
+                auto_mark: mark_select.options[mark_select.selectedIndex].value,
+                auto_description: document.getElementById("auto_description").value,
+                auto_price: document.getElementById("auto_price").value,
+                auto_picture: reader.result,
+                auto_picture_ext: ext.split('.').pop()
+            };
+
+            const data = JSON.stringify(send_data);
+
+            let request = new XMLHttpRequest();
+            request.open("POST", "/create_ad", true);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.addEventListener
+            ("load", function ()
+                {
+                    let recv = JSON.parse(request.response);
+                    if(recv)
+                        alert("Объявление отправлено на рассмотрение модераторами!");
+                    else
+                        alert("Ошибка при отправке!");
+                });
+            request.send(data);
+        };
+
+        reader.readAsDataURL(file);
+
+        return false;
+    }
+</script>

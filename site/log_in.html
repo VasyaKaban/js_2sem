@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<script>
+    function try_log_in()
+    {
+        const user =
+        {
+            login: document.getElementById("login").value,
+            pwd: document.getElementById("password").value,
+            log_in_as_admin: sessionStorage.getItem("log_in_as_admin")
+        };
+
+        const data = JSON.stringify(user);
+
+        let request = new XMLHttpRequest();
+        request.open("POST", "/log_in", true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                let recv = JSON.parse(request.response);
+                if(recv.exist)
+                {
+                    console.log(recv.is_active);
+                    if(sessionStorage.getItem("log_in_as_admin") === 'true')
+                    {
+                        alert("Вы вошли как " + user.login);
+                        sessionStorage.setItem("login", user.login);
+                        window.location.href = '/admin_panel';
+                    }
+                    else if(recv.is_active )
+                    {
+                        alert("Вы вошли как " + user.login);
+                        sessionStorage.setItem("login", user.login);
+                        window.location.href = '/';
+                    }
+                    else
+                    {
+                        alert("Ваш аккаунт был заблокирован!");
+                    }
+                }
+                else
+                    alert("Такого пользователя не существует!");
+            });
+        request.send(data);
+    }
+</script>
+<html>
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <body>
+        <div class="centred_div">
+            <form>
+                <input id="login" type="text" minlength=4 placeholder="Логин" />
+                <br>
+                <input id="password" type="text" minlength=4 placeholder="Пароль" />
+                <br>
+                <input type="button" value="Вход" onclick="try_log_in();"/>
+            </form>
+        </div>
+    </body>
+</html>
+

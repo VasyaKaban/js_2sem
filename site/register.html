@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<script>
+    function try_reg()
+    {
+        const user =
+        {
+            login: document.getElementById("login").value,
+            pwd:document.getElementById("password").value,
+            log_in_as_admin: sessionStorage.getItem("log_in_as_admin")
+        };
+
+        const data = JSON.stringify(user);
+
+        let request = new XMLHttpRequest();
+        request.open("POST", "/register", true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.addEventListener
+        ("load", function ()
+            {
+                let recv = JSON.parse(request.response);
+                if(recv)
+                {
+                    alert("Вы успешно зарегистрировались! Для продолжения работы войдите под своим логином и паролем!");
+                    if(sessionStorage.getItem("log_in_as_admin") === 'true')
+                        window.location.href = '/log_in';
+                    else
+                        window.location.href = '/log_in';
+
+                }
+                else
+                    alert("Такой пользователь уже существует!");
+            });
+        request.send(data);
+    }
+</script>
+<html>
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <body>
+        <div class="centred_div">
+            <form>
+                <input type="text" minlength=4 placeholder="Логин" id="login" />
+                <br>
+                <input type="text" minlength=4 placeholder="Пароль" id="password" />
+                <br>
+                <input type="button" value="Регистрация" onclick="try_reg();"/>
+            </form>
+        </div>
+    </body>
+</html>
+
